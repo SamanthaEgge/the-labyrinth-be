@@ -6,7 +6,7 @@ Room.objects.all().delete()
 
 import random
 
-def world_generation(x, y, num_rooms)
+def world_generation(size_x, size_y, num_rooms):
 
   # Initialize the grid
   world_array = [None] * num_rooms

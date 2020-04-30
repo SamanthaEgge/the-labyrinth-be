@@ -20,7 +20,6 @@ def World_Generator(player):
   ### Do I need grid except for saving the world to a save file, and not brute force?
   ## how else am I going to generate/save rooms.
   ## :thonk:
-  grid = None
 
   ######################### TODO: future solution
   ### ON init it looks for a file that's saved that's called the_labyrinth.txt
@@ -33,10 +32,11 @@ def World_Generator(player):
   size_x = width
   size_y = height
   num_rooms = width * height
-  grid = [None] * size_y
-  for i in range( len(grid) ):
-    grid[i] = [None] * size_x
-  print(grid)
+  # grid = [None] * size_y
+  # for i in range( len(grid) ):
+  #   grid[i] = [None] * size_x
+  # print(grid)
+  world_array = [None] * num_rooms
 
   # Start from lower-left corner (0,0)
   x = 0
@@ -56,7 +56,8 @@ def World_Generator(player):
       # print('first if')
       # print(x, y)
       room = Room(room_count, "A Generic Room", "This is a generic room.", x, y)
-      grid[y][x] = room
+      # grid[y][x] = room
+      world_array[room_count] = room
       x += 1
       room_count = room_count + 1
 
@@ -66,7 +67,7 @@ def World_Generator(player):
       # print('first elif')
       # print(x, y)
       room = Room(room_count, "A Generic Room", "This is a generic room.", x, y)
-      grid[y][x] = room
+      world_array[room_count] = room
       y += 1
       x = 0
       room_count = room_count + 1
@@ -75,7 +76,7 @@ def World_Generator(player):
       # print('second elif')
       # print(x, y)
       room = Room(room_count, "A Generic Room", "This is a generic room.", x, y)
-      grid[y][x] = room
+      world_array[room_count] = room
       x += 1
       room_count = room_count + 1
       # print(x, y)
@@ -83,7 +84,7 @@ def World_Generator(player):
       # print('LAST ONE')
       # print(x, y)
       room = Room(room_count, "A Generic Room", "This is a generic room.", x, y)
-      grid[y][x] = room
+      world_array[room_count] = room
       # print(room_count, num_rooms)
       room_count = room_count+1
     else:
@@ -105,122 +106,152 @@ def World_Generator(player):
   ## can_w: x-1, y == 0
   
   #### Now that rooms are created, we can connect them randomly
-  for row in grid:
-    for room in row:
-      print('starting room connections')
-      print(room.x, room.y)
-      # Initalizing variables for examining room connections and blockers
-      can_n = 'open'
-      can_e = 'open'
-      can_s = 'open'
-      can_w = 'open'
-      curr_connected = 0
-      curr_x = room.x
-      curr_y = room.y
-      indexed_height = height-1
-      indexed_width = width-1
+  for room in world_array:
+    print('starting room connections')
+    print(room.x, room.y)
+    # Initalizing variables for examining room connections and blockers
+    can_n = 'open'
+    can_e = 'open'
+    can_s = 'open'
+    can_w = 'open'
+    curr_connected = 0
+    curr_x = room.x
+    curr_y = room.y
+    indexed_height = height-1
+    indexed_width = width-1
+    room_count = 0
 
-      ## Checking current room connections
-      if room.check_connections('n'):
-        can_n = 'connected'
-        curr_connected += 1
-      if room.check_connections('e'):
-        can_e = 'connected'
-        curr_connected += 1
-      if room.check_connections('s'):
-        can_s = 'connected'
-        curr_connected += 1
-      if room.check_connections('w'):
-        can_w = 'connected'
-        curr_connected += 1
+    ## Checking current room connections
+    if room.check_connections('n'):
+      can_n = 'connected'
+      curr_connected += 1
+    if room.check_connections('e'):
+      can_e = 'connected'
+      curr_connected += 1
+    if room.check_connections('s'):
+      can_s = 'connected'
+      curr_connected += 1
+    if room.check_connections('w'):
+      can_w = 'connected'
+      curr_connected += 1
 
-      ## Generating chance for how many connections ---- I DON'T KNOW HOW RANDOM WORKS
-        ## 100% to get first connection
-        ## 80% to get second connection
-        ## 60% to get third
-        ## 10% to get 4th
+    ## Generating chance for how many connections ---- I DON'T KNOW HOW RANDOM WORKS
+      ## 100% to get first connection
+      ## 80% to get second connection
+      ## 60% to get third
+      ## 10% to get 4th
 
-      connection_roll = random.randint(0,10)
-      # print('connection_roll')
-      # print(connection_roll)
-      ###### TO-DO: THIS SHIT DOESN'T WORK. I DON'T UNDERSTAND PERCENT CHANCES WTF???????
-      connection_attempts = 0
-      if connection_roll <= 1:
-        connection_attempts = 4
-      elif connection_roll > 1 and connection_roll < 5:
-        connection_attempts = 3
-      elif connection_roll >= 5 and connection_roll < 9:
-        connection_attempts = 2
-      else:
-        connection_attempts = 1
+    connection_roll = random.randint(0,10)
+    # print('connection_roll')
+    # print(connection_roll)
+    ###### TO-DO: THIS SHIT DOESN'T WORK. I DON'T UNDERSTAND PERCENT CHANCES WTF???????
+    connection_attempts = 0
+    if connection_roll <= 1:
+      connection_attempts = 4
+    elif connection_roll > 1 and connection_roll < 5:
+      connection_attempts = 3
+    elif connection_roll >= 5 and connection_roll < 9:
+      connection_attempts = 2
+    else:
+      connection_attempts = 1
 
-      ### If the amount of connections rolled == the current amount of connections, nothing left to do!
-      if connection_attempts == curr_connected:
-        print('were in the connect = curr check')
-        pass
+    ### If the amount of connections rolled == the current amount of connections, nothing left to do!
+    if connection_attempts == curr_connected:
+      print('were in the connect = curr check')
+      pass
 
-      ### Now to check which directions are block
-      blocked = 0
-      print('checking blocks')
-      if curr_x == 0:
-        can_s = 'blocked'
-        blocked += 1
-      if curr_x == indexed_width:
-        can_e = 'blocked'
-        blocked += 1
-      if curr_y == 0:
-        can_w = 'blocked'
-        blocked += 1
-      if curr_y == indexed_height:
-        can_n = 'blocked'
-        blocked += 1
+    ### Now to check which directions are block
+    blocked = 0
+    print('checking blocks')
+    if curr_x == 0:
+      can_s = 'blocked'
+      blocked += 1
+    if curr_x == indexed_width:
+      can_e = 'blocked'
+      blocked += 1
+    if curr_y == 0:
+      can_w = 'blocked'
+      blocked += 1
+    if curr_y == indexed_height:
+      can_n = 'blocked'
+      blocked += 1
 
-      #### TO-DO: SPECIAL CASE
-      ### If connection_attempts is 4 and blocked are 2, need to only check 2. if connection attempts are 2 and blocked are 2, still need to check 2
-      ## how the fuck do u math that
+    #### TO-DO: SPECIAL CASE
+    ### If connection_attempts is 4 and blocked are 2, need to only check 2. if connection attempts are 2 and blocked are 2, still need to check 2
+    ## how the fuck do u math that
 
 
-      ### NOW IT'S TIME TO MAKE SOME CONNECTIONS, LADIES AND GENTS
-      print('starting connection while loop')
-      print(connection_attempts)
-      while connection_attempts > 0:
-        connection_complete = False
-        # print('we in first while')
-        while connection_complete is False:
-          # print('start of second while')
-          #Roll for direction  
-          direction_roll = random.randint(0,3)
-          # print(direction_roll)
-          # set directions to array
-          directions = [can_n, can_e, can_s, can_w]
-          direction_array = ['n', 'e', 's', 'w']
-          # print(directions[direction_roll])
-          print('this is the directions roll')
-          print(directions[direction_roll])
-          if directions[direction_roll] == 'open':
-            # print('success')
-            # directions[direction_roll] = 'connected'
-            ####### UAOLDFKS;LADSF HOW DOES SOME FUCKING IDIOT CONNECT ROOMS
-            new_x = curr_x
-            new_y = curr_y
-            ## Creating new direction
-            if direction_roll == 0: # N
-              new_y = curr_y + 1
-            if direction_roll == 1: # E
-              new_x = curr_x + 1
-            if direction_roll == 2: # S
-              new_y = curr_y - 1
-            if direction_roll == 3: # W
-              new_x = curr_x - 1
-            print('AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH')
-            print(curr_x, curr_y)
-            print(new_x, new_y)
-            new_direction = direction_array[direction_roll]
-            new_room = grid[new_y][new_x]
-            print(new_direction)
-            room.connect_rooms(new_room, new_direction)
-          connection_attempts = connection_attempts - 1
-          connection_complete = True
+    ### NOW IT'S TIME TO MAKE SOME CONNECTIONS, LADIES AND GENTS
+    print('starting connection while loop')
+    print(connection_attempts)
+    while connection_attempts > 0:
+      connection_complete = False
+      # print('we in first while')
+      while connection_complete is False:
+        # print('start of second while')
+        #Roll for direction  
+        direction_roll = random.randint(0,3)
+        # print(direction_roll)
+        # set directions to array
+        directions = [can_n, can_e, can_s, can_w]
+        direction_array = ['n', 'e', 's', 'w']
+        # print(directions[direction_roll])
+        print('this is the directions roll')
+        print(directions[direction_roll])
+        if directions[direction_roll] == 'open':
+          # print('success')
+          # directions[direction_roll] = 'connected'
+          ####### UAOLDFKS;LADSF HOW DOES SOME FUCKING IDIOT CONNECT ROOMS
+          new_x = curr_x
+          new_y = curr_y
+          ## Creating new direction
+          if direction_roll == 0: # N
+            new_y = curr_y + 1
+          if direction_roll == 1: # E
+            new_x = curr_x + 1
+          if direction_roll == 2: # S
+            new_y = curr_y - 1
+          if direction_roll == 3: # W
+            new_x = curr_x - 1
+
+          curr_id = room_count
+          if direction_roll == 0: # N
+            new_id = curr_id + height
+          if direction_roll == 1: # E
+            new_id = curr_id + 1
+          if direction_roll == 2: # S
+            new_id = curr_id - height
+          if direction_roll == 3: # W
+            new_id = curr_id - 1
+          print('AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH')
+          print(curr_x, curr_y)
+          print(new_x, new_y)
+          new_direction = direction_array[direction_roll]
+          ### need function to acquire adjacent node
+
+          ### Take x/y coords, determine 
+
+          # new_room = grid[new_y][new_x]
+          new_room = world_array[room_count]
+          print(new_direction)
+          room.connect_rooms(new_room, new_direction)
+        connection_attempts = connection_attempts - 1
+        connection_complete = True
+        room_count = room_count + 1
+
+  for room in world_array:
+    room.save()
+
+
+    ######
+    ## x => e => +1, x < = w <= -1
+    ## y
+    # 0000, 0001, 0002, 0003, 0004, 0005, 0006, 0007, 0008, 0009, 
+    # 0010, 0011, 0012, 0013, 0014, 0015, 0016, 0017, 0018, 0019
+    # 0020, 0021, 0022, 0023, 0024, 0025, 0026, 0027, 0028, 0029
+
+    ## 0000, 0001, 0002, 0003, 0004, 0005, 0006, 0007, 0008, 0009, 0010, 0011, 0012, 0013, 0014, 0015, 0016, 0017, 0018, 0019
+    ## 0020, 0021, 0022, 0023, 0024, 0025, 0026, 0027, 0028, 0029, 0030, 0031, 0032, 0033, 0034, 0035, 0036, 0037, 0038, 0039
 
 
 ####
